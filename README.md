@@ -19,9 +19,9 @@ Aplikacja działa offline i może być zainstalowana na telefonie jak zwykła ap
 ## Instalacja na telefonie
 
 Android
-1. Otwórz aplikację w przeglądarce (np. Chrome) -> wpisz adres: https://agatakrysztofczyk1.github.io/narzedziownik/
+1. Otwórz aplikację w przeglądarce (np. Chrome) -> wpisz adres: https://agatakrysztofczyk.github.io/narzedziownik/
 2. Wybierz Zainstaluj aplikację lub Dodaj do ekranu głównego.
 
 iOS
-1. Otwórz aplikację w Safari -> wpisz adres: https://agatakrysztofczyk1.github.io/narzedziownik/
+1. Otwórz aplikację w Safari -> wpisz adres: https://agatakrysztofczyk.github.io/narzedziownik/
 2. Wybierz Udostępnij → Dodaj do ekranu początkowego.
