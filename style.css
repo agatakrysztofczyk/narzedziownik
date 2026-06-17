@@ -447,12 +447,25 @@ body.dark #toggleThemeBtn {
   background: rgba(0, 0, 0, 0.6);
   z-index: 2000;
   overflow: auto; /* fallback dla bardzo długiej treści */
+  text-align: center;     /* centrowanie okna w poziomie */
+  white-space: nowrap;
+}
+.modal::before {
+  content: "";
+  display: inline-block;
+  height: 100%;
+  vertical-align: middle; /* "duch", który centruje okno idealnie w pionie */
 }
 
 .modal-content {
   background: #fff;
   max-width: 860px;          /* szersze okno = mniej linii tekstu = niższe */
-  margin: 2.5vh auto;        /* mniej pustego miejsca u góry */
+  width: calc(100% - 2rem);  /* szerokość + odstęp boczny */
+  display: inline-block;
+  vertical-align: middle;    /* idealnie na środku w pionie */
+  text-align: left;          /* tekst wraca do normalnego wyrównania */
+  white-space: normal;
+  margin: 2.5vh 0;           /* odrobina luzu góra/dół przy wysokiej treści */
   padding: 1.8rem;
   border-radius: 12px;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
@@ -464,7 +477,7 @@ body.dark #toggleThemeBtn {
 
 @media (max-width: 800px) {
   .modal-content {
-    margin: 2.5vh 1rem;    /* margines boczny, żeby nie dotykało krawędzi */
+    margin: 2.5vh 0;       /* odstęp boczny zapewnia już width: calc(100% - 2rem) */
     max-height: 90vh;
   }
 }
