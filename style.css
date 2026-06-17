@@ -185,7 +185,10 @@ button.hidden {
 
 .card h3 {
   color: #1976d2;
-  margin-bottom: 0.2rem;
+  font-size: 1.35rem; /* wyraźnie większa nazwa, mocno się wyróżnia */
+  font-weight: 700;
+  line-height: 1.25;
+  margin-bottom: 0.4rem;
 }
 
 .card h4 {
@@ -284,6 +287,13 @@ body.dark .card a {
   color: #90caf9;
 }
 
+body.dark .card strong {
+  color: #ffffff; /* jasna, wyraźna etykieta w trybie ciemnym */
+}
+body.dark .card span {
+  color: #ddd;
+}
+
 body.dark footer {
   background: #1a1a1a;
   color: #999;
@@ -348,14 +358,17 @@ body.dark #toggleThemeBtn {
 }
 .card strong {
   display: block;
-  font-size: 1.05em;
+  font-size: 1rem;
+  font-weight: 700;
   margin-top: 0.6em;
-  color: #1976d2;
+  color: #222; /* mocna, ciemna etykieta – wyraźny kontrast jak w oknie szczegółów */
 }
 .card span {
   display: block;
-  font-size: 0.95em;
+  font-size: 0.95rem;
   line-height: 1.4em;
+  color: #333;
+  white-space: pre-line; /* kafelki respektują złamania linii (numerowane punkty w osobnych wierszach) */
 }
 
 /* --- Modal (okno szczegółów) --- */
@@ -476,4 +489,3 @@ body.dark .close-modal-btn {
 body.dark .close-modal-btn:hover {
   color: #fff;
 }
-
