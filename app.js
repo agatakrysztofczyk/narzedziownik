@@ -50,6 +50,10 @@ formToggleBtn.addEventListener("click", () => {
   const visible = formSection.style.display === "block";
   formSection.style.display = visible ? "none" : "block";
   formToggleBtn.textContent = visible ? "➕ Dodaj nowe narzędzie" : "✖️ Ukryj formularz";
+  // Po pokazaniu formularza przewiń ekran tak, żeby było go widać
+  if (!visible) {
+    formSection.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 });
 
 // ==========================

@@ -33,49 +33,62 @@
 		<section id="formSection">
 		  <h2>Dodaj lub edytuj narzędzie</h2>
 		  <form id="toolForm">
-			<input type="hidden" id="toolId">
-
-			<label for="nazwaPL">Nazwa narzędzia (PL):</label>
-			<input type="text" id="nazwaPL" placeholder="np. Medytacja">
-
-			<label for="nazwaEN">Nazwa narzędzia (EN):</label>
-			<input type="text" id="nazwaEN" placeholder="np. Meditation">
-
-			<label for="kategoria">Kategoria:</label>
-			<input type="text" id="kategoria" placeholder="np. Relaks">
-
-			<label for="potrzebne">Co będzie potrzebne do wykonania?</label>
-			<textarea id="potrzebne" rows="2" placeholder="np. Ciche miejsce, mata"></textarea>
-
-			<label for="efekt">Jaki daje efekt?</label>
-			<textarea id="efekt" rows="2" placeholder="np. Redukcja stresu i napięcia"></textarea>
-
-			<label for="czasEfektu">Po jakim czasie można zauważyć efekt?</label>
-			<input type="text" id="czasEfektu" placeholder="np. Po kilku dniach">
-
-			<label for="przeciwskazania">Przeciwskazania:</label>
-			<textarea id="przeciwskazania" rows="2" placeholder="np. Brak dla zdrowych osób"></textarea>
-
-			<label for="instrukcja">Instrukcja:</label>
-			<textarea id="instrukcja" rows="3" placeholder="np. Usiądź wygodnie i skup się na oddechu"></textarea>
-
-			<label for="linkYoutube">Link do instruktażu na YouTube:</label>
-			<input type="url" id="linkYoutube" placeholder="https://youtube.com/...">
-
-			<label for="linkWWW">Link do strony WWW z opisem:</label>
-			<input type="url" id="linkWWW" placeholder="https://example.com/...">
-
-			<label for="hasztagi">Na co pomaga (hasztagi):</label>
-			<input type="text" id="hasztagi" placeholder="#stres #relaks">
-
-			<label for="nurt">W jakim nurcie psychoterapii jest wykorzystywane?</label>
-			<input type="text" id="nurt" placeholder="np. Mindfulness, CBT">
-
-			<div class="form-buttons">
-			  <button type="submit">💾 Zapisz</button>
-			  <button type="button" id="cancelEdit" class="hidden">❌ Anuluj edycję</button>
-			</div>
-		  </form>
+            <input type="hidden" id="toolId">
+            <div class="form-grid">
+            <div class="field">
+              <label for="nazwaPL">Nazwa narzędzia (PL):</label>
+              <input type="text" id="nazwaPL" placeholder="np. Medytacja">
+            </div>
+            <div class="field">
+              <label for="nazwaEN">Nazwa narzędzia (EN):</label>
+              <input type="text" id="nazwaEN" placeholder="np. Meditation">
+            </div>
+            <div class="field">
+              <label for="kategoria">Kategoria:</label>
+              <input type="text" id="kategoria" placeholder="np. Relaks">
+            </div>
+            <div class="field">
+              <label for="potrzebne">Co będzie potrzebne do wykonania?</label>
+              <textarea id="potrzebne" rows="2" placeholder="np. Ciche miejsce, mata"></textarea>
+            </div>
+            <div class="field">
+              <label for="efekt">Jaki daje efekt?</label>
+              <textarea id="efekt" rows="2" placeholder="np. Redukcja stresu i napięcia"></textarea>
+            </div>
+            <div class="field">
+              <label for="czasEfektu">Po jakim czasie można zauważyć efekt?</label>
+              <input type="text" id="czasEfektu" placeholder="np. Po kilku dniach">
+            </div>
+            <div class="field">
+              <label for="przeciwskazania">Przeciwskazania:</label>
+              <textarea id="przeciwskazania" rows="2" placeholder="np. Brak dla zdrowych osób"></textarea>
+            </div>
+            <div class="field">
+              <label for="instrukcja">Instrukcja:</label>
+              <textarea id="instrukcja" rows="3" placeholder="np. Usiądź wygodnie i skup się na oddechu"></textarea>
+            </div>
+            <div class="field">
+              <label for="linkYoutube">Link do instruktażu na YouTube:</label>
+              <input type="url" id="linkYoutube" placeholder="https://youtube.com/...">
+            </div>
+            <div class="field">
+              <label for="linkWWW">Link do strony WWW z opisem:</label>
+              <input type="url" id="linkWWW" placeholder="https://example.com/...">
+            </div>
+            <div class="field">
+              <label for="hasztagi">Na co pomaga (hasztagi):</label>
+              <input type="text" id="hasztagi" placeholder="#stres #relaks">
+            </div>
+            <div class="field">
+              <label for="nurt">W jakim nurcie psychoterapii jest wykorzystywane?</label>
+              <input type="text" id="nurt" placeholder="np. Mindfulness, CBT">
+            </div>
+            </div>
+            <div class="form-buttons">
+              <button type="submit">💾 Zapisz</button>
+              <button type="button" id="cancelEdit" class="hidden">❌ Anuluj edycję</button>
+            </div>
+          </form>
 		</section>
 
     <!-- FILTROWANIE -->
