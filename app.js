@@ -9,12 +9,78 @@ const searchInput = document.getElementById("searchInput");
 const cancelEditBtn = document.getElementById("cancelEdit");
 const offlineStatus = document.getElementById("offlineStatus");
 const hashtagFilter = document.getElementById("hashtagFilter");
+const categoryFilter = document.getElementById("categoryFilter");
+const activeFiltersBox = document.getElementById("activeFilters");
+const toggleHashtagsBtn = document.getElementById("toggleHashtagsBtn");
 const formToggleBtn = document.getElementById("toggleFormBtn"); // nowy przycisk
 const modal = document.getElementById("toolModal");
 const modalContent = document.getElementById("modalContent");
 const closeModalBtn = document.getElementById("closeModalBtn");
 
-let activeTag = null;
+// --- Stan filtrów ---
+let activeTags = new Set();   // zaznaczone hasztagi (przechowywane jako "#token")
+let activeCategory = "";      // wybrana kategoria
+let hashtagsExpanded = false; // czy "Na co pomaga" jest rozwinięte
+const HASHTAGS_COLLAPSED_COUNT = 14;
+
+// ==========================
+// SŁOWNIK ETYKIET HASZTAGÓW
+// W danych zostaje "#token" (do pozycjonowania), na ekranie pokazujemy
+// czytelną etykietę ze spacjami i bez "#".
+// To wersja wstępna – popraw wszystko, co źle przeczytałam.
+// ==========================
+const TAG_LABELS = {
+  "przeciążenie": "przeciążenie",
+  "samokrytyka": "samokrytyka",
+  "smutek": "smutek",
+  "osamotnienie": "osamotnienie",
+  "uspokojenieciała": "uspokojenie ciała",
+  "panika": "panika",
+  "lęk": "lęk",
+  "nadmiernepobudzenie": "nadmierne pobudzenie",
+  "trzęsiemnie": "trzęsie mnie",
+  "kołataniaserca": "kołatania serca",
+  "płytkioddech": "płytki oddech",
+  "niepokój": "niepokój",
+  "uspokojenieoddechu": "uspokojenie oddechu",
+  "drażliwość": "drażliwość",
+  "pośpiechwmyślach": "pośpiech w myślach",
+  "ściskwklatce": "ścisk w klatce",
+  "chcemisiępłakać": "chce mi się płakać",
+  "napięcie": "napięcie",
+  "potrzebaukojenia": "potrzeba ukojenia",
+  "odrealnienie": "odrealnienie",
+  "dysocjacja": "dysocjacja",
+  "gonitwamyśli": "gonitwa myśli",
+  "tuiteraz": "tu i teraz",
+  "napiętemięśnie": "napięte mięśnie",
+  "stres": "stres",
+  "bezsenność": "bezsenność",
+  "bólnapięciowy": "ból napięciowy",
+  "pocenie": "pocenie",
+  "drżenie": "drżenie",
+  "napadlęku": "napad lęku",
+  "goracowciele": "gorąco w ciele",
+  "złość": "złość",
+  "impulsywność": "impulsywność",
+  "pobudzenie": "pobudzenie",
+  "reset": "reset",
+  "wyciszenie": "wyciszenie",
+  "napięciemięśni": "napięcie mięśni",
+  "relaksprzedsnem": "relaks przed snem",
+  "zastój": "zastój",
+  "apatia": "apatia",
+  "odpoczynek": "odpoczynek",
+  "regeneracja": "regeneracja",
+  "resetciała": "reset ciała",
+  "frustracja": "frustracja"
+};
+
+// Zamienia "#token" na czytelną etykietę. Brak w słowniku => zdejmuje samo "#".
+function tagLabel(tag) {
+  const token = (tag || "").replace(/^#/, "");
+  return TAG_LABELS[token] || token;
+}
 
 // --- Obsługa trybu offline ---
 window.addEventListener("online", () => offlineStatus.textContent = "🟢 online");
@@ -61,14 +127,14 @@ formToggleBtn.addEventListener("click", () => {
 });
 
 // ==========================
-// RENDEROWANIE LISTY – widok skrócony
+// RENDEROWANIE LISTY – widok skrócony (masonry)
 // ==========================
 async function renderTools(tools = null) {
   const all = tools || await getAllTools();
   list.innerHTML = "";
 
   if (all.length === 0) {
-    list.innerHTML = "<p>Brak narzędzi.</p>";
+    list.innerHTML = "<p>Brak narzędzi spełniających wybrane filtry.</p>";
     return;
   }
 
@@ -79,8 +145,12 @@ async function renderTools(tools = null) {
 
     const namePL = tool.nazwaPL ? `<h3>${tool.nazwaPL}</h3>` : "";
     const nameEN = tool.nazwaEN ? `<h4>${tool.nazwaEN}</h4>` : "";
+    const grafika = tool.grafika
+      ? `<img class="card-image" src="grafiki/${tool.grafika}" alt="" loading="lazy" onerror="this.style.display='none'">`
+      : "";
 
     card.innerHTML = `
+      ${grafika}
       ${namePL || nameEN || "<h3>Bez nazwy</h3>"}
       ${tool.kategoria ? `<p><strong>Kategoria:</strong> <span>${tool.kategoria}</span></p>` : ""}
       ${tool.potrzebne ? `<p><strong>Potrzebne:</strong> <span>${tool.potrzebne}</span></p>` : ""}
@@ -90,8 +160,6 @@ async function renderTools(tools = null) {
     `;
     list.appendChild(card);
   });
-
-  renderTagFilters();
 }
 
 // ==========================
@@ -99,7 +167,11 @@ async function renderTools(tools = null) {
 // ==========================
 function openToolModal(tool) {
   modal.style.display = "block";
+  const grafika = tool.grafika
+    ? `<img class="modal-image" src="grafiki/${tool.grafika}" alt="" onerror="this.style.display='none'">`
+    : "";
   modalContent.innerHTML = `
+    ${grafika}
     <h2>${tool.nazwaPL || tool.nazwaEN || "Bez nazwy"}</h2>
     ${tool.nazwaEN ? `<p><strong>Nazwa (EN):</strong> ${tool.nazwaEN}</p>` : ""}
     ${tool.kategoria ? `<p><strong>Kategoria:</strong> ${tool.kategoria}</p>` : ""}
@@ -111,9 +183,8 @@ function openToolModal(tool) {
     ${tool.linkYoutube ? `<p><strong>🎥 Link do YouTube:</strong> <a href="${tool.linkYoutube}" target="_blank">${tool.linkYoutube}</a></p>` : ""}
     ${tool.linkWWW ? `<p><strong>🌐 Link do strony:</strong> <a href="${tool.linkWWW}" target="_blank">${tool.linkWWW}</a></p>` : ""}
     ${tool.nurt ? `<p><strong>W jakim nurcie psychoterapii jest wykorzystywane?:</strong> ${tool.nurt}</p>` : ""}
-    ${tool.hasztagi?.length ? `<p><strong>Na co pomaga:</strong> ${(tool.hasztagi || []).map(h => `<span class="tag">${h}</span>`).join(" ")}</p>` : ""}
+    ${tool.hasztagi?.length ? `<p><strong>Na co pomaga:</strong> ${(tool.hasztagi || []).map(h => `<span class="tag">${tagLabel(h)}</span>`).join(" ")}</p>` : ""}
     <button id="closeModalBtnInner" class="close-modal-btn" aria-label="Zamknij okno">×</button>
-
   `;
 
   document.getElementById("closeModalBtnInner").addEventListener("click", closeModal);
@@ -125,30 +196,143 @@ function closeModal() {
 }
 
 // ==========================
-// FILTROWANIE PO HASZTAGACH
+// PANEL FILTRÓW (zintegrowany)
 // ==========================
-async function renderTagFilters() {
+
+// Lista rozwijana z kategoriami – budowana z danych
+async function buildCategoryOptions() {
+  if (!categoryFilter) return;
   const tools = await getAllTools();
-  const tags = new Set(tools.flatMap(t => t.hasztagi || []));
+  const cats = [...new Set(tools.map(t => t.kategoria).filter(Boolean))]
+    .sort((a, b) => a.localeCompare(b, "pl"));
+  const current = activeCategory;
+  categoryFilter.innerHTML = '<option value="">Wszystkie kategorie</option>';
+  cats.forEach(c => {
+    const opt = document.createElement("option");
+    opt.value = c;
+    opt.textContent = c;
+    categoryFilter.appendChild(opt);
+  });
+  categoryFilter.value = current;
+}
+
+// Kafelki-przyciski "Na co pomaga" (wielokrotny wybór + zwijanie)
+async function renderHashtagTiles() {
+  const tools = await getAllTools();
+  const tags = [...new Set(tools.flatMap(t => t.hasztagi || []))]
+    .sort((a, b) => tagLabel(a).localeCompare(tagLabel(b), "pl"));
+
   hashtagFilter.innerHTML = "";
-  tags.forEach(tag => {
+  const visible = hashtagsExpanded ? tags : tags.slice(0, HASHTAGS_COLLAPSED_COUNT);
+
+  visible.forEach(tag => {
     const span = document.createElement("span");
-    span.textContent = tag;
-    span.className = "hashtag" + (tag === activeTag ? " active" : "");
-    span.onclick = () => filterByTag(tag);
+    span.textContent = tagLabel(tag);
+    span.className = "hashtag" + (activeTags.has(tag) ? " active" : "");
+    span.onclick = () => toggleTag(tag);
     hashtagFilter.appendChild(span);
+  });
+
+  if (toggleHashtagsBtn) {
+    if (tags.length > HASHTAGS_COLLAPSED_COUNT) {
+      toggleHashtagsBtn.style.display = "inline-block";
+      toggleHashtagsBtn.textContent = hashtagsExpanded
+        ? "pokaż mniej"
+        : `pokaż wszystkie (${tags.length})`;
+    } else {
+      toggleHashtagsBtn.style.display = "none";
+    }
+  }
+}
+
+function toggleTag(tag) {
+  if (activeTags.has(tag)) {
+    activeTags.delete(tag);
+  } else {
+    activeTags.add(tag);
+  }
+  renderHashtagTiles();
+  applyFilters();
+}
+
+// Aktywne filtry z możliwością zdjęcia (✕)
+function renderActiveFilters() {
+  if (!activeFiltersBox) return;
+  activeFiltersBox.innerHTML = "";
+
+  if (activeCategory) {
+    activeFiltersBox.appendChild(makeChip(activeCategory, () => {
+      activeCategory = "";
+      if (categoryFilter) categoryFilter.value = "";
+      applyFilters();
+    }));
+  }
+
+  activeTags.forEach(tag => {
+    activeFiltersBox.appendChild(makeChip(tagLabel(tag), () => {
+      activeTags.delete(tag);
+      renderHashtagTiles();
+      applyFilters();
+    }));
   });
 }
 
-async function filterByTag(tag) {
-  if (activeTag === tag) {
-    activeTag = null;
-    renderTools();
-  } else {
-    activeTag = tag;
-    const filtered = await searchByTag(tag);
-    renderTools(filtered);
-  }
+function makeChip(label, onRemove) {
+  const chip = document.createElement("span");
+  chip.className = "active-chip";
+  chip.textContent = label + " ";
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.setAttribute("aria-label", "Usuń filtr");
+  btn.textContent = "×";
+  btn.onclick = onRemove;
+  chip.appendChild(btn);
+  return chip;
+}
+
+// Złożenie wszystkich filtrów: różne pola łączą się przez "i" (zawężanie),
+// a w obrębie "Na co pomaga" wystarczy dowolny z zaznaczonych hasztagów.
+async function applyFilters() {
+  const term = (searchInput.value || "").trim().toLowerCase();
+  const all = await getAllTools();
+
+  const filtered = all.filter(t => {
+    const haystack = [
+      t.nazwaPL, t.nazwaEN, t.kategoria, t.efekt, t.potrzebne, t.instrukcja, t.nurt
+    ].map(v => (v || "").toLowerCase()).join(" ");
+
+    const matchesText = !term || haystack.includes(term);
+    const matchesCat = !activeCategory || t.kategoria === activeCategory;
+
+    const tags = t.hasztagi || [];
+    const matchesTags = activeTags.size === 0 || [...activeTags].some(tag => tags.includes(tag));
+
+    return matchesText && matchesCat && matchesTags;
+  });
+
+  renderTools(filtered);
+  renderActiveFilters();
+}
+
+// Odświeżenie kontrolek filtrów (po dodaniu/edycji/usunięciu narzędzia)
+async function initFilters() {
+  await buildCategoryOptions();
+  await renderHashtagTiles();
+  renderActiveFilters();
+}
+
+if (categoryFilter) {
+  categoryFilter.addEventListener("change", () => {
+    activeCategory = categoryFilter.value;
+    applyFilters();
+  });
+}
+
+if (toggleHashtagsBtn) {
+  toggleHashtagsBtn.addEventListener("click", () => {
+    hashtagsExpanded = !hashtagsExpanded;
+    renderHashtagTiles();
+  });
 }
 
 // ==========================
@@ -168,6 +352,7 @@ form.addEventListener("submit", async (e) => {
   const instrukcja = document.getElementById("instrukcja").value.trim();
   const linkYoutube = document.getElementById("linkYoutube").value.trim();
   const linkWWW = document.getElementById("linkWWW").value.trim();
+  const grafika = document.getElementById("grafika").value.trim();
   const hasztagi = document.getElementById("hasztagi").value
     .split(" ")
     .filter(h => h.startsWith("#") && h.length > 1);
@@ -180,7 +365,7 @@ form.addEventListener("submit", async (e) => {
 
   const tool = {
     nazwaPL, nazwaEN, kategoria, potrzebne, efekt, czasEfektu,
-    przeciwskazania, instrukcja, linkYoutube, linkWWW, hasztagi, nurt
+    przeciwskazania, instrukcja, linkYoutube, linkWWW, grafika, hasztagi, nurt
   };
 
   if (id) {
@@ -191,14 +376,16 @@ form.addEventListener("submit", async (e) => {
 
   form.reset();
   cancelEditBtn.classList.add("hidden");
-  form.style.display = "none";
+  document.getElementById("formSection").style.display = "none";
   formToggleBtn.textContent = "➕ Dodaj nowe narzędzie";
-  renderTools();
+  await initFilters();
+  applyFilters();
 });
 
 async function removeTool(id) {
   await deleteTool(id);
-  renderTools();
+  await initFilters();
+  applyFilters();
 }
 
 async function editTool(id) {
@@ -214,35 +401,25 @@ async function editTool(id) {
   document.getElementById("instrukcja").value = tool.instrukcja || "";
   document.getElementById("linkYoutube").value = tool.linkYoutube || "";
   document.getElementById("linkWWW").value = tool.linkWWW || "";
+  document.getElementById("grafika").value = tool.grafika || "";
   document.getElementById("hasztagi").value = (tool.hasztagi || []).join(" ");
   document.getElementById("nurt").value = tool.nurt || "";
   cancelEditBtn.classList.remove("hidden");
-  form.style.display = "block";
+  document.getElementById("formSection").style.display = "block";
   formToggleBtn.textContent = "✖️ Ukryj formularz";
 }
 
 cancelEditBtn.addEventListener("click", () => {
   form.reset();
   cancelEditBtn.classList.add("hidden");
-  form.style.display = "none";
+  document.getElementById("formSection").style.display = "none";
   formToggleBtn.textContent = "➕ Dodaj nowe narzędzie";
 });
 
 // ==========================
-// WYSZUKIWANIE
+// WYSZUKIWANIE (lupka) – wpięte we wspólne filtrowanie
 // ==========================
-searchInput.addEventListener("input", async () => {
-  const term = searchInput.value.toLowerCase();
-  const all = await getAllTools();
-  const filtered = all.filter(t =>
-    (t.nazwaPL?.toLowerCase().includes(term)) ||
-    (t.nazwaEN?.toLowerCase().includes(term)) ||
-    (t.kategoria?.toLowerCase().includes(term)) ||
-    (t.efekt?.toLowerCase().includes(term)) ||
-    (t.instrukcja?.toLowerCase().includes(term))
-  );
-  renderTools(filtered);
-});
+searchInput.addEventListener("input", () => applyFilters());
 
 // ==========================
 // IMPORT CSV (separator | + <EOL> + enter)
@@ -263,9 +440,8 @@ async function importToolsFromCSV() {
       headers.forEach((h, i) => item[h] = values[i] !== undefined ? values[i] : "");
 
       const hasztagi = (item["Na co pomaga (hashtagi)"] || "")
-	    .split(" ")
-		.filter(h => h.startsWith("#"));
-
+        .split(" ")
+        .filter(h => h.startsWith("#"));
 
       await addTool({
         nazwaPL: item["Nazwa narzędzia (PL)"],
@@ -278,6 +454,7 @@ async function importToolsFromCSV() {
         instrukcja: item["Instrukcja"],
         linkYoutube: item["Link do instruktażu na youtube"],
         linkWWW: item["Link do strony www z opisem"],
+        grafika: item["Grafika"] || "",
         hasztagi,
         nurt: item["W jakim nurcie psychoterapii jest wykorzystywane?"]
       });
@@ -297,6 +474,6 @@ window.addEventListener("load", async () => {
   if (!tools.length) {
     await importToolsFromCSV();
   }
-  renderTools(await getAllTools());
+  await initFilters();
+  applyFilters();
 });
-

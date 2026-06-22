@@ -20,7 +20,6 @@
 	<div id="themeToggle">
 		<button id="toggleThemeBtn" title="Zmień motyw">🌙 Tryb ciemny</button>
 	</div>
-    <input type="text" id="searchInput" placeholder="🔍 Szukaj narzędzia...">
   </header>
 
   <main>
@@ -76,6 +75,10 @@
               <input type="url" id="linkWWW" placeholder="https://example.com/...">
             </div>
             <div class="field">
+              <label for="grafika">Grafika (nazwa pliku w folderze grafiki/):</label>
+              <input type="text" id="grafika" placeholder="np. motylek.png">
+            </div>
+            <div class="field">
               <label for="hasztagi">Na co pomaga (hasztagi):</label>
               <input type="text" id="hasztagi" placeholder="#stres #relaks">
             </div>
@@ -91,10 +94,28 @@
           </form>
 		</section>
 
-    <!-- FILTROWANIE -->
-    <section id="filterSection">
-      <h3>Filtruj po hasztagach:</h3>
-      <div id="hashtagFilter"></div>
+    <!-- ZINTEGROWANY PANEL WYSZUKIWANIA I FILTROWANIA -->
+    <section id="filterPanel">
+      <div class="filter-search">
+        <input type="text" id="searchInput" placeholder="🔍 Szukaj po nazwie, efekcie, potrzebnych, nurcie...">
+      </div>
+
+      <div class="filter-row">
+        <div class="filter-field">
+          <label for="categoryFilter">Kategoria</label>
+          <select id="categoryFilter">
+            <option value="">Wszystkie kategorie</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="activeFilters" class="active-filters"></div>
+
+      <div class="filter-hashtags">
+        <span class="filter-label">Na co pomaga</span>
+        <div id="hashtagFilter"></div>
+        <button type="button" id="toggleHashtagsBtn">pokaż wszystkie…</button>
+      </div>
     </section>
 
     <!-- LISTA NARZĘDZI -->
@@ -114,4 +135,3 @@
   <script src="app.js"></script>
 </body>
 </html>
-

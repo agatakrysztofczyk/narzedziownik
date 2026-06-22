@@ -522,3 +522,227 @@ body.dark .close-modal-btn:hover {
   color: #fff;
 }
 
+/* ========================================== */
+/* NOWA WERSJA: pełna szerokość, masonry,      */
+/* grafiki na kafelkach, zintegrowany panel    */
+/* filtrów. Ta sekcja celowo jest NA KOŃCU,    */
+/* żeby nadpisać wcześniejsze reguły.          */
+/* ========================================== */
+
+/* --- Pełna szerokość strony --- */
+main {
+  max-width: none;                          /* zdejmujemy ograniczenie 1000px */
+  width: 100%;
+  margin: 1.5rem 0;
+  padding: 1rem clamp(1rem, 4vw, 3rem);     /* wygodne marginesy boczne */
+}
+
+/* --- Siatka kafelków: masonry (CSS columns) --- */
+.grid {
+  display: block;                           /* wyłączamy stary grid */
+  column-width: 300px;                      /* szerokość kolumny; liczba kolumn dobiera się sama */
+  column-gap: 1.4rem;
+  margin-top: 1.5rem;
+}
+
+.card {
+  width: 100%;
+  margin: 0 0 1.4rem 0;                      /* odstęp pionowy między kafelkami w kolumnie */
+  display: inline-block;                     /* pomaga uniknąć rozcinania kafelka */
+  break-inside: avoid;
+  -webkit-column-break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+/* --- Grafika na górze kafelka --- */
+.card-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 8px;
+  margin-bottom: 0.7rem;
+  object-fit: cover;
+}
+
+/* --- Grafika w oknie szczegółów --- */
+.modal-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  object-fit: cover;
+}
+
+/* --- Zintegrowany panel wyszukiwania i filtrów --- */
+#filterPanel {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+  padding: 1.2rem 1.4rem;
+  margin-bottom: 1.5rem;
+}
+
+.filter-search input {
+  width: 100%;
+  padding: 0.7rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+  background: #fafafa;
+  outline: none;
+}
+.filter-search input:focus {
+  border-color: #1976d2;
+  background: #fff;
+  box-shadow: 0 0 0 2px rgba(25,118,210,0.1);
+}
+
+.filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 0.9rem;
+}
+
+.filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  flex: 1;
+  min-width: 220px;
+}
+.filter-field label {
+  font-weight: 600;
+  color: #444;
+  font-size: 0.9rem;
+}
+.filter-field select {
+  padding: 0.55rem 0.7rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  background: #fafafa;
+  font-size: 0.95rem;
+  outline: none;
+}
+.filter-field select:focus {
+  border-color: #1976d2;
+  background: #fff;
+  box-shadow: 0 0 0 2px rgba(25,118,210,0.1);
+}
+
+.active-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.9rem;
+}
+.active-filters:empty {
+  margin-top: 0;
+}
+.active-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #1976d2;
+  color: #fff;
+  border-radius: 8px;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.9rem;
+}
+.active-chip button {
+  background: transparent;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  padding: 0;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+.active-chip button:hover {
+  background: transparent;
+}
+
+.filter-hashtags {
+  margin-top: 1rem;
+}
+.filter-label {
+  display: block;
+  font-weight: 600;
+  color: #444;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Kafelki-przyciski "Na co pomaga" – nadpisują stary okrągły styl .hashtag */
+#hashtagFilter {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 0.5rem;
+}
+.hashtag {
+  background: #e3f2fd;
+  color: #1976d2;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 0.35rem 0.8rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: 0.15s;
+}
+.hashtag:hover {
+  background: #bbdefb;
+}
+.hashtag.active {
+  background: #1976d2;
+  color: #fff;
+}
+
+#toggleHashtagsBtn {
+  margin-top: 0.6rem;
+  background: transparent;
+  color: #1976d2;
+  border: none;
+  padding: 0.2rem 0;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+#toggleHashtagsBtn:hover {
+  background: transparent;
+  text-decoration: underline;
+}
+
+/* --- Tryb ciemny dla nowego panelu --- */
+body.dark #filterPanel {
+  background: #1e1e1e;
+  box-shadow: 0 2px 6px rgba(255,255,255,0.05);
+}
+body.dark .filter-search input,
+body.dark .filter-field select {
+  background: #2a2a2a;
+  color: #ddd;
+  border: 1px solid #444;
+}
+body.dark .filter-field label,
+body.dark .filter-label {
+  color: #ddd;
+}
+body.dark .active-chip {
+  background: #90caf9;
+  color: #000;
+}
+body.dark .active-chip button {
+  color: #000;
+}
+body.dark #toggleHashtagsBtn {
+  color: #90caf9;
+}
+
+/* --- Wąskie ekrany (telefon) --- */
+@media (max-width: 800px) {
+  .grid {
+    column-width: 100%;   /* jedna kolumna na telefonie */
+    column-gap: 0;
+  }
+}
