@@ -27,7 +27,6 @@ const HASHTAGS_COLLAPSED_COUNT = 14;
 // SŁOWNIK ETYKIET HASZTAGÓW
 // W danych zostaje "#token" (do pozycjonowania), na ekranie pokazujemy
 // czytelną etykietę ze spacjami i bez "#".
-// To wersja wstępna – popraw wszystko, co źle przeczytałam.
 // ==========================
 const TAG_LABELS = {
   "przeciążenie": "przeciążenie",
