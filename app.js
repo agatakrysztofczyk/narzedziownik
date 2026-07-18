@@ -59,7 +59,7 @@ const TAG_LABELS = {
   "pocenie": "pocenie",
   "drżenie": "drżenie",
   "napadlęku": "napad lęku",
-  "goracowciele": "gorąco w ciele",
+  "gorącowciele": "gorąco w ciele",
   "złość": "złość",
   "impulsywność": "impulsywność",
   "pobudzenie": "pobudzenie",
