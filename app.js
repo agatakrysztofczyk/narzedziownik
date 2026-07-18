@@ -16,6 +16,7 @@ const formToggleBtn = document.getElementById("toggleFormBtn"); // nowy przycisk
 const modal = document.getElementById("toolModal");
 const modalContent = document.getElementById("modalContent");
 const closeModalBtn = document.getElementById("closeModalBtn");
+const resultsCount = document.getElementById("resultsCount");
 
 // --- Stan filtrów ---
 let activeTags = new Set();   // zaznaczone hasztagi (przechowywane jako "#token")
@@ -289,6 +290,24 @@ function makeChip(label, onRemove) {
   return chip;
 }
 
+// Poprawna polska odmiana słowa "narzędzie" w zależności od liczby.
+// 1 -> narzędzie, 2-4 (poza 12-14) -> narzędzia, reszta -> narzędzi
+function narzedzieOdmiana(n) {
+  if (n === 1) return "narzędzie";
+  const lastDigit = n % 10;
+  const lastTwoDigits = n % 100;
+  if (lastDigit >= 2 && lastDigit <= 4 && !(lastTwoDigits >= 12 && lastTwoDigits <= 14)) {
+    return "narzędzia";
+  }
+  return "narzędzi";
+}
+
+// Aktualizacja licznika wyników nad listą narzędzi.
+function updateResultsCount(count) {
+  if (!resultsCount) return;
+  resultsCount.textContent = `Znaleziono ${count} ${narzedzieOdmiana(count)}`;
+}
+
 // Złożenie wszystkich filtrów: różne pola łączą się przez "i" (zawężanie),
 // a w obrębie "Na co pomaga" wystarczy dowolny z zaznaczonych hasztagów.
 async function applyFilters() {
@@ -311,6 +330,7 @@ async function applyFilters() {
 
   renderTools(filtered);
   renderActiveFilters();
+  updateResultsCount(filtered.length);
 }
 
 // Odświeżenie kontrolek filtrów (po dodaniu/edycji/usunięciu narzędzia)
