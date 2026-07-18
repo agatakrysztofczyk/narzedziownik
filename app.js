@@ -38,7 +38,7 @@ const TAG_LABELS = {
   "lęk": "lęk",
   "nadmiernepobudzenie": "nadmierne pobudzenie",
   "trzęsiemnie": "trzęsie mnie",
-  "kołataniaserca": "kołatania serca",
+  "kołatanieserca": "kołatanie serca",
   "płytkioddech": "płytki oddech",
   "niepokój": "niepokój",
   "uspokojenieoddechu": "uspokojenie oddechu",
