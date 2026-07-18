@@ -1,0 +1,29 @@
+name: Testy automatyczne
+
+# Uruchamia testy przy każdym Pull Requeście i przy każdym wgraniu
+# zmian do brancha "master" - żeby błąd był widoczny na GitHubie
+# zanim ktokolwiek zdąży wdrożyć zmianę.
+on:
+  pull_request:
+    branches: [ master ]
+  push:
+    branches: [ master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pobranie kodu
+        uses: actions/checkout@v4
+
+      - name: Ustawienie Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Instalacja zależności
+        run: npm install
+
+      - name: Uruchomienie testów
+        run: npm test
