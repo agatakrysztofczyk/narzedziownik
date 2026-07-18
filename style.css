@@ -574,6 +574,17 @@ main {
   object-fit: cover;
 }
 
+/* --- Licznik wyników nad listą narzędzi --- */
+.results-count {
+  color: #555;
+  font-size: 0.95rem;
+  margin: 0 0 0.8rem 0.2rem;
+}
+
+body.dark .results-count {
+  color: #aaa;
+}
+
 /* --- Zintegrowany panel wyszukiwania i filtrów --- */
 #filterPanel {
   background: #fff;
