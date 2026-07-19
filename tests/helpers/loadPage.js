@@ -4,9 +4,12 @@
 // ale bez dostępu do sieci (Dexie i IndexedDB brane z lokalnych paczek
 // npm zamiast z CDN/prawdziwej przeglądarki, tools.csv czytany z dysku).
 //
-// Skrypty uruchamiamy RĘCZNIE (a nie automatycznie przez jsdom), żeby
-// zdążyć podstawić fake-indexeddb na "window" zanim Dexie spróbuje
-// go użyć.
+// Skrypty dodajemy jako prawdziwe elementy <script> (tak jak przeglądarka),
+// a NIE przez eval() - to ważne, bo `const`/`let` zadeklarowane na
+// najwyższym poziomie w eval() znika po zakończeniu eval(), podczas gdy
+// w prawdziwych <script> tagach (i tak jak w index.html) zostaje
+// widoczne dla kolejnych skryptów na stronie (np. `db.js` deklaruje
+// `const db`, z którego korzysta późniejszy `app.js`).
 // ==========================
 
 const fs = require("fs");
@@ -22,14 +25,17 @@ const repoRoot = path.resolve(__dirname, "..", "..");
  * Zwraca { dom, errors } - errors to lista błędów JS złapanych w trakcie ładowania.
  */
 async function loadPage() {
-  const html = fs.readFileSync(path.join(repoRoot, "index.html"), "utf-8");
+  let html = fs.readFileSync(path.join(repoRoot, "index.html"), "utf-8");
+
+  // Usuwamy oryginalne <script> - dodamy je ręcznie, PO podstawieniu
+  // fake-indexeddb, żeby Dexie (w db.js) na pewno je zastało.
+  html = html.replace(/<script[^>]*><\/script>/g, "");
+
   const errors = [];
 
-  // "outside-only" = jsdom NIE wykonuje automatycznie <script> - zrobimy to
-  // sami, ręcznie, w kontrolowanej kolejności.
   const dom = new JSDOM(html, {
     url: "https://agatakrysztofczyk.github.io/narzedziownik/index.html",
-    runScripts: "outside-only",
+    runScripts: "dangerously",
     pretendToBeVisual: true,
   });
 
@@ -63,18 +69,18 @@ async function loadPage() {
   const dbSrc = fs.readFileSync(path.join(repoRoot, "db.js"), "utf-8");
   const appSrc = fs.readFileSync(path.join(repoRoot, "app.js"), "utf-8");
 
-  // Uruchamiamy skrypty w tej samej kolejności co w index.html.
-  try {
-    window.eval(dexieSrc);
-    window.eval(dbSrc);
-    window.eval(appSrc);
-  } catch (err) {
-    errors.push(err.message);
+  // Dodajemy skrypty jako prawdziwe elementy <script>, w tej samej
+  // kolejności co w index.html - top-level `const`/`let` z jednego
+  // skryptu zostają widoczne dla kolejnych (dokładnie jak w przeglądarce).
+  for (const src of [dexieSrc, dbSrc, appSrc]) {
+    const scriptEl = window.document.createElement("script");
+    scriptEl.textContent = src;
+    window.document.body.appendChild(scriptEl);
   }
 
   // app.js nasłuchuje na zdarzenie "load" strony, żeby zaimportować dane
-  // i wyrenderować listę - odpalamy je ręcznie, bo skrypty nie zostały
-  // uruchomione automatycznie przy parsowaniu HTML.
+  // i wyrenderować listę - odpalamy je ręcznie, bo doszliśmy tu już po
+  // naturalnym "load" (skrypty zostały dodane już po sparsowaniu HTML).
   window.dispatchEvent(new window.Event("load"));
 
   // Czekamy, aż operacje asynchroniczne (import CSV, budowa filtrów, render)
