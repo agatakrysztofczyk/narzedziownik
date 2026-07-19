@@ -117,6 +117,11 @@ formToggleBtn.addEventListener("click", () => {
   const visible = formSection.style.display === "block";
   formSection.style.display = visible ? "none" : "block";
   formToggleBtn.textContent = visible ? "➕ Dodaj nowe narzędzie" : "✖️ Ukryj formularz";
+  if (!visible) {
+    // Pokazujemy formularz do DODANIA nowego narzędzia - lista kategorii
+    // ma być pusta/aktualna (bez wybranej wartości).
+    populateFormCategorySelect("");
+  }
   // Po pokazaniu formularza wyśrodkuj widok tak, by oba przyciski były widoczne
   if (!visible) {
     const top = formToggleBtn.getBoundingClientRect().top + window.scrollY;
@@ -232,6 +237,72 @@ async function buildCategoryOptions() {
     categoryFilter.appendChild(opt);
   });
   categoryFilter.value = current;
+}
+
+// Lista rozwijana z kategoriami w formularzu dodawania/edycji narzędzia,
+// z opcją "dodaj nową kategorię" na końcu. Wywoływana za każdym razem,
+// gdy formularz się pokazuje, żeby lista była zawsze aktualna.
+async function populateFormCategorySelect(selectedValue = "") {
+  const kategoriaSelect = document.getElementById("kategoria");
+  if (!kategoriaSelect) return;
+
+  const tools = await getAllTools();
+  const cats = [...new Set(tools.map(t => t.kategoria).filter(Boolean))]
+    .sort((a, b) => a.localeCompare(b, "pl"));
+
+  kategoriaSelect.innerHTML = '<option value="">— wybierz kategorię —</option>';
+  cats.forEach(c => {
+    const opt = document.createElement("option");
+    opt.value = c;
+    opt.textContent = c;
+    kategoriaSelect.appendChild(opt);
+  });
+
+  const nowaOpt = document.createElement("option");
+  nowaOpt.value = "__new__";
+  nowaOpt.textContent = "➕ Dodaj nową kategorię…";
+  kategoriaSelect.appendChild(nowaOpt);
+
+  // Jeśli edytowane narzędzie ma kategorię, której z jakiegoś powodu
+  // nie ma jeszcze na liście, dodajemy ją, żeby się nie zgubiła.
+  if (selectedValue && !cats.includes(selectedValue) && selectedValue !== "__new__") {
+    const extraOpt = document.createElement("option");
+    extraOpt.value = selectedValue;
+    extraOpt.textContent = selectedValue;
+    kategoriaSelect.insertBefore(extraOpt, kategoriaSelect.lastChild);
+  }
+
+  kategoriaSelect.value = selectedValue;
+}
+
+// Pokazuje/ukrywa pole do wpisania nazwy nowej kategorii, w zależności
+// od tego, czy w liście wybrano "➕ Dodaj nową kategorię…".
+function setupKategoriaSelectListener() {
+  const kategoriaSelect = document.getElementById("kategoria");
+  const kategoriaNowaInput = document.getElementById("kategoriaNowa");
+  if (!kategoriaSelect || !kategoriaNowaInput) return;
+
+  kategoriaSelect.addEventListener("change", () => {
+    const isNew = kategoriaSelect.value === "__new__";
+    kategoriaNowaInput.style.display = isNew ? "block" : "none";
+    if (isNew) {
+      kategoriaNowaInput.focus();
+    } else {
+      kategoriaNowaInput.value = "";
+    }
+  });
+}
+setupKategoriaSelectListener();
+
+// Odczytuje faktyczną wartość kategorii z formularza - albo wybraną
+// z listy, albo wpisaną ręcznie jako nowa kategoria.
+function readKategoriaFromForm() {
+  const kategoriaSelect = document.getElementById("kategoria");
+  const kategoriaNowaInput = document.getElementById("kategoriaNowa");
+  if (kategoriaSelect && kategoriaSelect.value === "__new__") {
+    return (kategoriaNowaInput?.value || "").trim();
+  }
+  return kategoriaSelect ? kategoriaSelect.value : "";
 }
 
 // Kafelki-przyciski "Na co pomaga" (wielokrotny wybór + zwijanie)
@@ -405,7 +476,7 @@ form.addEventListener("submit", async (e) => {
 
   const nazwaPL = document.getElementById("nazwaPL").value.trim();
   const nazwaEN = document.getElementById("nazwaEN").value.trim();
-  const kategoria = document.getElementById("kategoria").value.trim();
+  const kategoria = readKategoriaFromForm();
   const potrzebne = document.getElementById("potrzebne").value.trim();
   const efekt = document.getElementById("efekt").value.trim();
   const czasEfektu = document.getElementById("czasEfektu").value.trim();
@@ -436,6 +507,7 @@ form.addEventListener("submit", async (e) => {
   }
 
   form.reset();
+  document.getElementById("kategoriaNowa").style.display = "none";
   cancelEditBtn.classList.add("hidden");
   document.getElementById("formSection").style.display = "none";
   formToggleBtn.textContent = "➕ Dodaj nowe narzędzie";
@@ -454,7 +526,7 @@ async function editTool(id) {
   document.getElementById("toolId").value = tool.id;
   document.getElementById("nazwaPL").value = tool.nazwaPL || "";
   document.getElementById("nazwaEN").value = tool.nazwaEN || "";
-  document.getElementById("kategoria").value = tool.kategoria || "";
+  await populateFormCategorySelect(tool.kategoria || "");
   document.getElementById("potrzebne").value = tool.potrzebne || "";
   document.getElementById("efekt").value = tool.efekt || "";
   document.getElementById("czasEfektu").value = tool.czasEfektu || "";
@@ -472,6 +544,7 @@ async function editTool(id) {
 
 cancelEditBtn.addEventListener("click", () => {
   form.reset();
+  document.getElementById("kategoriaNowa").style.display = "none";
   cancelEditBtn.classList.add("hidden");
   document.getElementById("formSection").style.display = "none";
   formToggleBtn.textContent = "➕ Dodaj nowe narzędzie";

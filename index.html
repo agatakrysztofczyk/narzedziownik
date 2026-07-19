@@ -44,7 +44,11 @@
             </div>
             <div class="field">
               <label for="kategoria">Kategoria:</label>
-              <input type="text" id="kategoria" placeholder="np. Relaks">
+              <select id="kategoria">
+                <option value="">— wybierz kategorię —</option>
+                <option value="__new__">➕ Dodaj nową kategorię…</option>
+              </select>
+              <input type="text" id="kategoriaNowa" placeholder="Wpisz nazwę nowej kategorii" style="display:none; margin-top:0.4rem;">
             </div>
             <div class="field">
               <label for="potrzebne">Co będzie potrzebne do wykonania?</label>
