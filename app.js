@@ -18,6 +18,8 @@ const modalContent = document.getElementById("modalContent");
 const closeModalBtn = document.getElementById("closeModalBtn");
 const resultsCount = document.getElementById("resultsCount");
 const clearAllFiltersBtn = document.getElementById("clearAllFiltersBtn");
+const hasztagiInput = document.getElementById("hasztagi");
+const hasztagiSuggestionsBox = document.getElementById("hasztagiSuggestions");
 
 // --- Stan filtrów ---
 let activeTags = new Set();   // zaznaczone hasztagi (przechowywane jako "#token")
@@ -294,6 +296,91 @@ function setupKategoriaSelectListener() {
 }
 setupKategoriaSelectListener();
 
+// ==========================
+// PODPOWIEDZI (AUTOUZUPEŁNIANIE) HASZTAGÓW W FORMULARZU
+// ==========================
+
+// Zwraca listę wszystkich unikalnych hasztagów obecnych w bazie - to na
+// ich podstawie budujemy podpowiedzi, żeby uniknąć literówek tworzących
+// niepotrzebny nowy wariant (np. #stres i #stresu jako dwa różne tagi).
+async function getAllKnownHashtags() {
+  const tools = await getAllTools();
+  return [...new Set(tools.flatMap(t => t.hasztagi || []))];
+}
+
+// Zwraca aktualnie wpisywany fragment (token) w polu hasztagów, licząc
+// od ostatniego "#" do pozycji kursora - np. przy "#stres #re|" (kursor
+// po "re") zwróci "#re".
+function getCurrentHashtagToken(input) {
+  const pos = input.selectionStart ?? input.value.length;
+  const before = input.value.slice(0, pos);
+  const match = before.match(/(#[^\s#]*)$/);
+  return match ? match[1] : "";
+}
+
+// Podmienia aktualnie wpisywany fragment na wybrany hasztag (z dodaną
+// spacją po nim), nie ruszając reszty tego, co już jest w polu.
+function insertHashtagSuggestion(input, tag) {
+  const pos = input.selectionStart ?? input.value.length;
+  const before = input.value.slice(0, pos);
+  const after = input.value.slice(pos);
+  const newBefore = before.replace(/(#[^\s#]*)$/, tag + " ");
+  input.value = newBefore + after;
+  const newPos = newBefore.length;
+  input.setSelectionRange(newPos, newPos);
+}
+
+// Buduje i pokazuje listę podpowiedzi pasujących do aktualnie wpisywanego
+// fragmentu. Chowa listę, jeśli nic nie pasuje albo fragment jest za krótki.
+async function renderHashtagSuggestions() {
+  if (!hasztagiInput || !hasztagiSuggestionsBox) return;
+
+  const token = getCurrentHashtagToken(hasztagiInput);
+  if (!token || token.length < 3) {
+    hasztagiSuggestionsBox.classList.add("hidden");
+    hasztagiSuggestionsBox.innerHTML = "";
+    return;
+  }
+
+  const partial = token.slice(1).toLowerCase(); // fragment bez "#"
+  const known = await getAllKnownHashtags();
+  const matches = known
+    .filter(t => t.replace(/^#/, "").toLowerCase().includes(partial))
+    .slice(0, 8);
+
+  hasztagiSuggestionsBox.innerHTML = "";
+
+  if (matches.length === 0) {
+    hasztagiSuggestionsBox.classList.add("hidden");
+    return;
+  }
+
+  matches.forEach(tag => {
+    const item = document.createElement("span");
+    item.className = "tag-suggestion";
+    item.textContent = tagLabel(tag);
+    item.addEventListener("mousedown", (e) => {
+      // "mousedown" zamiast "click" - żeby zdążyć wstawić podpowiedź
+      // zanim zdarzenie "blur" na polu zdąży schować listę.
+      e.preventDefault();
+      insertHashtagSuggestion(hasztagiInput, tag);
+      hasztagiSuggestionsBox.classList.add("hidden");
+      hasztagiSuggestionsBox.innerHTML = "";
+      hasztagiInput.focus();
+    });
+    hasztagiSuggestionsBox.appendChild(item);
+  });
+
+  hasztagiSuggestionsBox.classList.remove("hidden");
+}
+
+if (hasztagiInput) {
+  hasztagiInput.addEventListener("input", renderHashtagSuggestions);
+  hasztagiInput.addEventListener("blur", () => {
+    hasztagiSuggestionsBox.classList.add("hidden");
+  });
+}
+
 // Odczytuje faktyczną wartość kategorii z formularza - albo wybraną
 // z listy, albo wpisaną ręcznie jako nowa kategoria.
 function readKategoriaFromForm() {
@@ -508,6 +595,7 @@ form.addEventListener("submit", async (e) => {
 
   form.reset();
   document.getElementById("kategoriaNowa").style.display = "none";
+  hasztagiSuggestionsBox.classList.add("hidden");
   cancelEditBtn.classList.add("hidden");
   document.getElementById("formSection").style.display = "none";
   formToggleBtn.textContent = "➕ Dodaj nowe narzędzie";
@@ -545,6 +633,7 @@ async function editTool(id) {
 cancelEditBtn.addEventListener("click", () => {
   form.reset();
   document.getElementById("kategoriaNowa").style.display = "none";
+  hasztagiSuggestionsBox.classList.add("hidden");
   cancelEditBtn.classList.add("hidden");
   document.getElementById("formSection").style.display = "none";
   formToggleBtn.textContent = "➕ Dodaj nowe narzędzie";
