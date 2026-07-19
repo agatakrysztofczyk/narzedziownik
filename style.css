@@ -596,6 +596,27 @@ body.dark .clear-all-btn:hover {
   background: #2a2a2a;
 }
 
+/* --- Placeholder gdy grafika się nie wczyta --- */
+.image-error-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: #fff3e0;
+  color: #9a5b00;
+  border: 1px dashed #e0a94a;
+  border-radius: 8px;
+  padding: 0.8rem;
+  margin-bottom: 0.7rem;
+  font-size: 0.85rem;
+  min-height: 60px;
+}
+body.dark .image-error-placeholder {
+  background: #332a1a;
+  color: #ffcc80;
+  border-color: #7a5b2a;
+}
+
 /* --- Licznik wyników nad listą narzędzi --- */
 .results-count {
   color: #555;

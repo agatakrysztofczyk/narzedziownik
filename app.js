@@ -127,9 +127,26 @@ formToggleBtn.addEventListener("click", () => {
   }
 });
 
-// ==========================
-// RENDEROWANIE LISTY – widok skrócony (masonry)
-// ==========================
+// Prosta ucieczka znaków specjalnych, żeby nazwa pliku grafiki mogła
+// być bezpiecznie osadzona w atrybucie HTML/wywołaniu JS w onerror.
+function escapeForAttribute(str) {
+  return (str || "")
+    .replace(/\\/g, "\\\\")
+    .replace(/'/g, "\\'")
+    .replace(/"/g, "&quot;");
+}
+
+// Zamiast cichego ukrywania obrazka (jak wcześniej), pokazujemy czytelny
+// placeholder z informacją, jaki plik się nie wczytał - pomocne przy
+// dodawaniu narzędzia, gdy w polu "grafika" jest literówka w nazwie pliku.
+function handleImageError(imgEl, filename) {
+  const placeholder = document.createElement("div");
+  placeholder.className = "image-error-placeholder";
+  placeholder.textContent = `⚠️ Nie udało się wczytać grafiki: ${filename}`;
+  imgEl.replaceWith(placeholder);
+}
+
+
 async function renderTools(tools = null) {
   const all = tools || await getAllTools();
   list.innerHTML = "";
@@ -147,7 +164,7 @@ async function renderTools(tools = null) {
     const namePL = tool.nazwaPL ? `<h3>${tool.nazwaPL}</h3>` : "";
     const nameEN = tool.nazwaEN ? `<h4>${tool.nazwaEN}</h4>` : "";
     const grafika = tool.grafika
-      ? `<img class="card-image" src="grafiki/${tool.grafika}" alt="" loading="lazy" onerror="this.style.display='none'">`
+      ? `<img class="card-image" src="grafiki/${tool.grafika}" alt="" loading="lazy" onerror="handleImageError(this, '${escapeForAttribute(tool.grafika)}')">`
       : "";
 
     card.innerHTML = `
@@ -169,7 +186,7 @@ async function renderTools(tools = null) {
 function openToolModal(tool) {
   modal.style.display = "block";
   const grafika = tool.grafika
-    ? `<img class="modal-image" src="grafiki/${tool.grafika}" alt="" onerror="this.style.display='none'">`
+    ? `<img class="modal-image" src="grafiki/${tool.grafika}" alt="" onerror="handleImageError(this, '${escapeForAttribute(tool.grafika)}')">`
     : "";
   modalContent.innerHTML = `
     ${grafika}
