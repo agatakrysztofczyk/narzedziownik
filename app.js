@@ -10,6 +10,7 @@ const cancelEditBtn = document.getElementById("cancelEdit");
 const offlineStatus = document.getElementById("offlineStatus");
 const hashtagFilter = document.getElementById("hashtagFilter");
 const categoryFilter = document.getElementById("categoryFilter");
+const sortOrderSelect = document.getElementById("sortOrder");
 const activeFiltersBox = document.getElementById("activeFilters");
 const toggleHashtagsBtn = document.getElementById("toggleHashtagsBtn");
 const formToggleBtn = document.getElementById("toggleFormBtn"); // nowy przycisk
@@ -18,10 +19,13 @@ const modalContent = document.getElementById("modalContent");
 const closeModalBtn = document.getElementById("closeModalBtn");
 const resultsCount = document.getElementById("resultsCount");
 const clearAllFiltersBtn = document.getElementById("clearAllFiltersBtn");
+const hasztagiInput = document.getElementById("hasztagi");
+const hasztagiSuggestionsBox = document.getElementById("hasztagiSuggestions");
 
 // --- Stan filtrów ---
 let activeTags = new Set();   // zaznaczone hasztagi (przechowywane jako "#token")
 let activeCategory = "";      // wybrana kategoria
+let currentSortOrder = "default"; // aktualnie wybrane sortowanie listy
 let hashtagsExpanded = false; // czy "Na co pomaga" jest rozwinięte
 const HASHTAGS_COLLAPSED_COUNT = 14;
 
@@ -294,6 +298,91 @@ function setupKategoriaSelectListener() {
 }
 setupKategoriaSelectListener();
 
+// ==========================
+// PODPOWIEDZI (AUTOUZUPEŁNIANIE) HASZTAGÓW W FORMULARZU
+// ==========================
+
+// Zwraca listę wszystkich unikalnych hasztagów obecnych w bazie - to na
+// ich podstawie budujemy podpowiedzi, żeby uniknąć literówek tworzących
+// niepotrzebny nowy wariant (np. #stres i #stresu jako dwa różne tagi).
+async function getAllKnownHashtags() {
+  const tools = await getAllTools();
+  return [...new Set(tools.flatMap(t => t.hasztagi || []))];
+}
+
+// Zwraca aktualnie wpisywany fragment (token) w polu hasztagów, licząc
+// od ostatniego "#" do pozycji kursora - np. przy "#stres #re|" (kursor
+// po "re") zwróci "#re".
+function getCurrentHashtagToken(input) {
+  const pos = input.selectionStart ?? input.value.length;
+  const before = input.value.slice(0, pos);
+  const match = before.match(/(#[^\s#]*)$/);
+  return match ? match[1] : "";
+}
+
+// Podmienia aktualnie wpisywany fragment na wybrany hasztag (z dodaną
+// spacją po nim), nie ruszając reszty tego, co już jest w polu.
+function insertHashtagSuggestion(input, tag) {
+  const pos = input.selectionStart ?? input.value.length;
+  const before = input.value.slice(0, pos);
+  const after = input.value.slice(pos);
+  const newBefore = before.replace(/(#[^\s#]*)$/, tag + " ");
+  input.value = newBefore + after;
+  const newPos = newBefore.length;
+  input.setSelectionRange(newPos, newPos);
+}
+
+// Buduje i pokazuje listę podpowiedzi pasujących do aktualnie wpisywanego
+// fragmentu. Chowa listę, jeśli nic nie pasuje albo fragment jest za krótki.
+async function renderHashtagSuggestions() {
+  if (!hasztagiInput || !hasztagiSuggestionsBox) return;
+
+  const token = getCurrentHashtagToken(hasztagiInput);
+  if (!token || token.length < 3) {
+    hasztagiSuggestionsBox.classList.add("hidden");
+    hasztagiSuggestionsBox.innerHTML = "";
+    return;
+  }
+
+  const partial = token.slice(1).toLowerCase(); // fragment bez "#"
+  const known = await getAllKnownHashtags();
+  const matches = known
+    .filter(t => t.replace(/^#/, "").toLowerCase().includes(partial))
+    .slice(0, 8);
+
+  hasztagiSuggestionsBox.innerHTML = "";
+
+  if (matches.length === 0) {
+    hasztagiSuggestionsBox.classList.add("hidden");
+    return;
+  }
+
+  matches.forEach(tag => {
+    const item = document.createElement("span");
+    item.className = "tag-suggestion";
+    item.textContent = tagLabel(tag);
+    item.addEventListener("mousedown", (e) => {
+      // "mousedown" zamiast "click" - żeby zdążyć wstawić podpowiedź
+      // zanim zdarzenie "blur" na polu zdąży schować listę.
+      e.preventDefault();
+      insertHashtagSuggestion(hasztagiInput, tag);
+      hasztagiSuggestionsBox.classList.add("hidden");
+      hasztagiSuggestionsBox.innerHTML = "";
+      hasztagiInput.focus();
+    });
+    hasztagiSuggestionsBox.appendChild(item);
+  });
+
+  hasztagiSuggestionsBox.classList.remove("hidden");
+}
+
+if (hasztagiInput) {
+  hasztagiInput.addEventListener("input", renderHashtagSuggestions);
+  hasztagiInput.addEventListener("blur", () => {
+    hasztagiSuggestionsBox.classList.add("hidden");
+  });
+}
+
 // Odczytuje faktyczną wartość kategorii z formularza - albo wybraną
 // z listy, albo wpisaną ręcznie jako nowa kategoria.
 function readKategoriaFromForm() {
@@ -421,6 +510,25 @@ function updateResultsCount(count) {
   resultsCount.textContent = `Znaleziono ${count} ${narzedzieOdmiana(count)}`;
 }
 
+// Sortuje listę narzędzi zgodnie z wybraną opcją (bez modyfikowania
+// oryginalnej tablicy). "default" zachowuje kolejność dodania do bazy.
+function sortTools(tools, sortOrder) {
+  const byName = (t) => (t.nazwaPL || t.nazwaEN || "").toLowerCase();
+
+  switch (sortOrder) {
+    case "name-asc":
+      return [...tools].sort((a, b) => byName(a).localeCompare(byName(b), "pl"));
+    case "name-desc":
+      return [...tools].sort((a, b) => byName(b).localeCompare(byName(a), "pl"));
+    case "category-asc":
+      return [...tools].sort((a, b) =>
+        (a.kategoria || "").localeCompare(b.kategoria || "", "pl")
+      );
+    default:
+      return tools;
+  }
+}
+
 // Złożenie wszystkich filtrów: różne pola łączą się przez "i" (zawężanie),
 // a w obrębie "Na co pomaga" wystarczy dowolny z zaznaczonych hasztagów.
 async function applyFilters() {
@@ -441,9 +549,18 @@ async function applyFilters() {
     return matchesText && matchesCat && matchesTags;
   });
 
-  renderTools(filtered);
+  const sorted = sortTools(filtered, currentSortOrder);
+
+  renderTools(sorted);
   renderActiveFilters();
-  updateResultsCount(filtered.length);
+  updateResultsCount(sorted.length);
+}
+
+if (sortOrderSelect) {
+  sortOrderSelect.addEventListener("change", () => {
+    currentSortOrder = sortOrderSelect.value;
+    applyFilters();
+  });
 }
 
 // Odświeżenie kontrolek filtrów (po dodaniu/edycji/usunięciu narzędzia)
@@ -508,6 +625,7 @@ form.addEventListener("submit", async (e) => {
 
   form.reset();
   document.getElementById("kategoriaNowa").style.display = "none";
+  hasztagiSuggestionsBox.classList.add("hidden");
   cancelEditBtn.classList.add("hidden");
   document.getElementById("formSection").style.display = "none";
   formToggleBtn.textContent = "➕ Dodaj nowe narzędzie";
@@ -545,6 +663,7 @@ async function editTool(id) {
 cancelEditBtn.addEventListener("click", () => {
   form.reset();
   document.getElementById("kategoriaNowa").style.display = "none";
+  hasztagiSuggestionsBox.classList.add("hidden");
   cancelEditBtn.classList.add("hidden");
   document.getElementById("formSection").style.display = "none";
   formToggleBtn.textContent = "➕ Dodaj nowe narzędzie";
