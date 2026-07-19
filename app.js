@@ -17,6 +17,7 @@ const modal = document.getElementById("toolModal");
 const modalContent = document.getElementById("modalContent");
 const closeModalBtn = document.getElementById("closeModalBtn");
 const resultsCount = document.getElementById("resultsCount");
+const clearAllFiltersBtn = document.getElementById("clearAllFiltersBtn");
 
 // --- Stan filtrów ---
 let activeTags = new Set();   // zaznaczone hasztagi (przechowywane jako "#token")
@@ -255,6 +256,26 @@ function toggleTag(tag) {
   applyFilters();
 }
 
+// Sprawdza, czy jakikolwiek filtr lub wyszukiwanie jest obecnie aktywne.
+function hasActiveFilters() {
+  const term = (searchInput.value || "").trim();
+  return Boolean(term) || Boolean(activeCategory) || activeTags.size > 0;
+}
+
+// Czyści wyszukiwanie, kategorię i wszystkie zaznaczone hasztagi jednym kliknięciem.
+function clearAllFilters() {
+  searchInput.value = "";
+  activeCategory = "";
+  if (categoryFilter) categoryFilter.value = "";
+  activeTags.clear();
+  renderHashtagTiles();
+  applyFilters();
+}
+
+if (clearAllFiltersBtn) {
+  clearAllFiltersBtn.addEventListener("click", clearAllFilters);
+}
+
 // Aktywne filtry z możliwością zdjęcia (✕)
 function renderActiveFilters() {
   if (!activeFiltersBox) return;
@@ -275,6 +296,10 @@ function renderActiveFilters() {
       applyFilters();
     }));
   });
+
+  if (clearAllFiltersBtn) {
+    clearAllFiltersBtn.classList.toggle("hidden", !hasActiveFilters());
+  }
 }
 
 function makeChip(label, onRemove) {
