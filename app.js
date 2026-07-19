@@ -10,6 +10,7 @@ const cancelEditBtn = document.getElementById("cancelEdit");
 const offlineStatus = document.getElementById("offlineStatus");
 const hashtagFilter = document.getElementById("hashtagFilter");
 const categoryFilter = document.getElementById("categoryFilter");
+const sortOrderSelect = document.getElementById("sortOrder");
 const activeFiltersBox = document.getElementById("activeFilters");
 const toggleHashtagsBtn = document.getElementById("toggleHashtagsBtn");
 const formToggleBtn = document.getElementById("toggleFormBtn"); // nowy przycisk
@@ -24,6 +25,7 @@ const hasztagiSuggestionsBox = document.getElementById("hasztagiSuggestions");
 // --- Stan filtrów ---
 let activeTags = new Set();   // zaznaczone hasztagi (przechowywane jako "#token")
 let activeCategory = "";      // wybrana kategoria
+let currentSortOrder = "default"; // aktualnie wybrane sortowanie listy
 let hashtagsExpanded = false; // czy "Na co pomaga" jest rozwinięte
 const HASHTAGS_COLLAPSED_COUNT = 14;
 
@@ -508,6 +510,25 @@ function updateResultsCount(count) {
   resultsCount.textContent = `Znaleziono ${count} ${narzedzieOdmiana(count)}`;
 }
 
+// Sortuje listę narzędzi zgodnie z wybraną opcją (bez modyfikowania
+// oryginalnej tablicy). "default" zachowuje kolejność dodania do bazy.
+function sortTools(tools, sortOrder) {
+  const byName = (t) => (t.nazwaPL || t.nazwaEN || "").toLowerCase();
+
+  switch (sortOrder) {
+    case "name-asc":
+      return [...tools].sort((a, b) => byName(a).localeCompare(byName(b), "pl"));
+    case "name-desc":
+      return [...tools].sort((a, b) => byName(b).localeCompare(byName(a), "pl"));
+    case "category-asc":
+      return [...tools].sort((a, b) =>
+        (a.kategoria || "").localeCompare(b.kategoria || "", "pl")
+      );
+    default:
+      return tools;
+  }
+}
+
 // Złożenie wszystkich filtrów: różne pola łączą się przez "i" (zawężanie),
 // a w obrębie "Na co pomaga" wystarczy dowolny z zaznaczonych hasztagów.
 async function applyFilters() {
@@ -528,9 +549,18 @@ async function applyFilters() {
     return matchesText && matchesCat && matchesTags;
   });
 
-  renderTools(filtered);
+  const sorted = sortTools(filtered, currentSortOrder);
+
+  renderTools(sorted);
   renderActiveFilters();
-  updateResultsCount(filtered.length);
+  updateResultsCount(sorted.length);
+}
+
+if (sortOrderSelect) {
+  sortOrderSelect.addEventListener("change", () => {
+    currentSortOrder = sortOrderSelect.value;
+    applyFilters();
+  });
 }
 
 // Odświeżenie kontrolek filtrów (po dodaniu/edycji/usunięciu narzędzia)
