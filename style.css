@@ -52,7 +52,7 @@ main {
 }
 
 /* --- FORMULARZ --- */
-#formSection {
+/* #formSection {
   background: #fff;
   padding: 1.5rem;
   border-radius: 12px;
@@ -74,15 +74,15 @@ form {
   display: grid;
   grid-template-columns: 1fr 1fr;
   column-gap: 2.5rem; /* wyraźny odstęp pionowy między dwiema kolumnami */
-  row-gap: 1.25rem;
-  align-items: start; /* pole nie rozciąga się do wysokości sąsiada */
-}
+  /* row-gap: 1.25rem; */
+  /* align-items: start; /* pole nie rozciąga się do wysokości sąsiada */ */
+/* }
 
 .field {
   display: flex;
   flex-direction: column;
   gap: 0.35rem; /* etykieta ciasno nad swoim polem */
-}
+/* } 
 
 form label {
   font-weight: 600;
@@ -107,10 +107,10 @@ form textarea:focus {
   border-color: #1976d2;
   background: #fff;
   box-shadow: 0 0 0 2px rgba(25,118,210,0.1);
-}
+} */
 
 /* przyciski formularza */
-.form-buttons {
+/* .form-buttons {
   grid-column: 1 / -1;
   display: flex;
   justify-content: center;
@@ -135,7 +135,7 @@ button:hover {
 
 button.hidden {
   display: none;
-}
+} */ 
 
 /* --- FILTROWANIE --- */
 #filterSection {
@@ -336,13 +336,13 @@ body.dark #toggleThemeBtn {
 /* ========================== */
 
 /* --- Ukrywanie formularza --- */
-#formSection {
+/* #formSection {
   display: none;
   margin-top: 1rem;
 }
 
 /* --- Przycisk pokazujący formularz --- */
-#toggleFormBtn {
+/* #toggleFormBtn {
   background-color: #1976d2;
   color: #fff;
   border: none;
@@ -354,7 +354,7 @@ body.dark #toggleThemeBtn {
 }
 #toggleFormBtn:hover {
   background-color: #125ba1;
-}
+} */ 
 
 /* --- Karty (widok skrócony) --- */
 .card {
