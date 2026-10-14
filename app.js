@@ -111,26 +111,26 @@ themeToggleBtn.addEventListener("click", () => {
 // ==========================
 // FORMULARZ – ukrywanie/pokazywanie
 // ==========================
-document.getElementById("formSection").style.display = "none";
-formToggleBtn.addEventListener("click", () => {
-  const formSection = document.getElementById("formSection");
-  const visible = formSection.style.display === "block";
-  formSection.style.display = visible ? "none" : "block";
-  formToggleBtn.textContent = visible ? "➕ Dodaj nowe narzędzie" : "✖️ Ukryj formularz";
-  if (!visible) {
-    // Pokazujemy formularz do DODANIA nowego narzędzia - lista kategorii
-    // ma być pusta/aktualna (bez wybranej wartości).
-    populateFormCategorySelect("");
-  }
-  // Po pokazaniu formularza wyśrodkuj widok tak, by oba przyciski były widoczne
-  if (!visible) {
-    const top = formToggleBtn.getBoundingClientRect().top + window.scrollY;
-    const bottom = formSection.getBoundingClientRect().bottom + window.scrollY;
-    const region = bottom - top;
-    const target = top - Math.max(0, (window.innerHeight - region) / 2);
-    window.scrollTo({ top: Math.max(0, target), behavior: "smooth" });
-  }
-});
+// document.getElementById("formSection").style.display = "none";
+// formToggleBtn.addEventListener("click", () => {
+//   const formSection = document.getElementById("formSection");
+//   const visible = formSection.style.display === "block";
+//   formSection.style.display = visible ? "none" : "block";
+//   formToggleBtn.textContent = visible ? "➕ Dodaj nowe narzędzie" : "✖️ Ukryj formularz";
+//   if (!visible) {
+//     // Pokazujemy formularz do DODANIA nowego narzędzia - lista kategorii
+//     // ma być pusta/aktualna (bez wybranej wartości).
+//     populateFormCategorySelect("");
+//   }
+//   // Po pokazaniu formularza wyśrodkuj widok tak, by oba przyciski były widoczne
+//   if (!visible) {
+//     const top = formToggleBtn.getBoundingClientRect().top + window.scrollY;
+//     const bottom = formSection.getBoundingClientRect().bottom + window.scrollY;
+//     const region = bottom - top;
+//     const target = top - Math.max(0, (window.innerHeight - region) / 2);
+//     window.scrollTo({ top: Math.max(0, target), behavior: "smooth" });
+//   }
+// });
 
 // Prosta ucieczka znaków specjalnych, żeby nazwa pliku grafiki mogła
 // być bezpiecznie osadzona w atrybucie HTML/wywołaniu JS w onerror.
@@ -470,85 +470,85 @@ if (toggleHashtagsBtn) {
 // ==========================
 // OBSŁUGA FORMULARZA (dodawanie / edycja / usuwanie)
 // ==========================
-form.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const id = document.getElementById("toolId").value;
+// form.addEventListener("submit", async (e) => {
+//   e.preventDefault();
+//   const id = document.getElementById("toolId").value;
 
-  const nazwaPL = document.getElementById("nazwaPL").value.trim();
-  const nazwaEN = document.getElementById("nazwaEN").value.trim();
-  const kategoria = readKategoriaFromForm();
-  const potrzebne = document.getElementById("potrzebne").value.trim();
-  const efekt = document.getElementById("efekt").value.trim();
-  const czasEfektu = document.getElementById("czasEfektu").value.trim();
-  const przeciwskazania = document.getElementById("przeciwskazania").value.trim();
-  const instrukcja = document.getElementById("instrukcja").value.trim();
-  const linkYoutube = document.getElementById("linkYoutube").value.trim();
-  const linkWWW = document.getElementById("linkWWW").value.trim();
-  const grafika = document.getElementById("grafika").value.trim();
-  const hasztagi = document.getElementById("hasztagi").value
-    .split(" ")
-    .filter(h => h.startsWith("#") && h.length > 1);
-  const nurt = document.getElementById("nurt").value.trim();
+//   const nazwaPL = document.getElementById("nazwaPL").value.trim();
+//   const nazwaEN = document.getElementById("nazwaEN").value.trim();
+//   const kategoria = readKategoriaFromForm();
+//   const potrzebne = document.getElementById("potrzebne").value.trim();
+//   const efekt = document.getElementById("efekt").value.trim();
+//   const czasEfektu = document.getElementById("czasEfektu").value.trim();
+//   const przeciwskazania = document.getElementById("przeciwskazania").value.trim();
+//   const instrukcja = document.getElementById("instrukcja").value.trim();
+//   const linkYoutube = document.getElementById("linkYoutube").value.trim();
+//   const linkWWW = document.getElementById("linkWWW").value.trim();
+//   const grafika = document.getElementById("grafika").value.trim();
+//   const hasztagi = document.getElementById("hasztagi").value
+//     .split(" ")
+//     .filter(h => h.startsWith("#") && h.length > 1);
+//   const nurt = document.getElementById("nurt").value.trim();
 
-  if (!nazwaPL && !nazwaEN) {
-    alert("Musisz podać co najmniej nazwę po polsku lub angielsku.");
-    return;
-  }
+//   if (!nazwaPL && !nazwaEN) {
+//     alert("Musisz podać co najmniej nazwę po polsku lub angielsku.");
+//     return;
+//   }
 
-  const tool = {
-    nazwaPL, nazwaEN, kategoria, potrzebne, efekt, czasEfektu,
-    przeciwskazania, instrukcja, linkYoutube, linkWWW, grafika, hasztagi, nurt
-  };
+//   const tool = {
+//     nazwaPL, nazwaEN, kategoria, potrzebne, efekt, czasEfektu,
+//     przeciwskazania, instrukcja, linkYoutube, linkWWW, grafika, hasztagi, nurt
+//   };
 
-  if (id) {
-    await updateTool(Number(id), tool);
-  } else {
-    await addTool(tool);
-  }
+//   if (id) {
+//     await updateTool(Number(id), tool);
+//   } else {
+//     await addTool(tool);
+//   }
 
-  form.reset();
-  document.getElementById("kategoriaNowa").style.display = "none";
-  cancelEditBtn.classList.add("hidden");
-  document.getElementById("formSection").style.display = "none";
-  formToggleBtn.textContent = "➕ Dodaj nowe narzędzie";
-  await initFilters();
-  applyFilters();
-});
+//   form.reset();
+//   document.getElementById("kategoriaNowa").style.display = "none";
+//   cancelEditBtn.classList.add("hidden");
+//   document.getElementById("formSection").style.display = "none";
+//   formToggleBtn.textContent = "➕ Dodaj nowe narzędzie";
+//   await initFilters();
+//   applyFilters();
+// });
 
-async function removeTool(id) {
-  await deleteTool(id);
-  await initFilters();
-  applyFilters();
-}
+// async function removeTool(id) {
+//   await deleteTool(id);
+//   await initFilters();
+//   applyFilters();
+// }
 
-async function editTool(id) {
-  const tool = await db.tools.get(id);
-  document.getElementById("toolId").value = tool.id;
-  document.getElementById("nazwaPL").value = tool.nazwaPL || "";
-  document.getElementById("nazwaEN").value = tool.nazwaEN || "";
-  await populateFormCategorySelect(tool.kategoria || "");
-  document.getElementById("potrzebne").value = tool.potrzebne || "";
-  document.getElementById("efekt").value = tool.efekt || "";
-  document.getElementById("czasEfektu").value = tool.czasEfektu || "";
-  document.getElementById("przeciwskazania").value = tool.przeciwskazania || "";
-  document.getElementById("instrukcja").value = tool.instrukcja || "";
-  document.getElementById("linkYoutube").value = tool.linkYoutube || "";
-  document.getElementById("linkWWW").value = tool.linkWWW || "";
-  document.getElementById("grafika").value = tool.grafika || "";
-  document.getElementById("hasztagi").value = (tool.hasztagi || []).join(" ");
-  document.getElementById("nurt").value = tool.nurt || "";
-  cancelEditBtn.classList.remove("hidden");
-  document.getElementById("formSection").style.display = "block";
-  formToggleBtn.textContent = "✖️ Ukryj formularz";
-}
+// async function editTool(id) {
+//   const tool = await db.tools.get(id);
+//   document.getElementById("toolId").value = tool.id;
+//   document.getElementById("nazwaPL").value = tool.nazwaPL || "";
+//   document.getElementById("nazwaEN").value = tool.nazwaEN || "";
+//   await populateFormCategorySelect(tool.kategoria || "");
+//   document.getElementById("potrzebne").value = tool.potrzebne || "";
+//   document.getElementById("efekt").value = tool.efekt || "";
+//   document.getElementById("czasEfektu").value = tool.czasEfektu || "";
+//   document.getElementById("przeciwskazania").value = tool.przeciwskazania || "";
+//   document.getElementById("instrukcja").value = tool.instrukcja || "";
+//   document.getElementById("linkYoutube").value = tool.linkYoutube || "";
+//   document.getElementById("linkWWW").value = tool.linkWWW || "";
+//   document.getElementById("grafika").value = tool.grafika || "";
+//   document.getElementById("hasztagi").value = (tool.hasztagi || []).join(" ");
+//   document.getElementById("nurt").value = tool.nurt || "";
+//   cancelEditBtn.classList.remove("hidden");
+//   document.getElementById("formSection").style.display = "block";
+//   formToggleBtn.textContent = "✖️ Ukryj formularz";
+// }
 
-cancelEditBtn.addEventListener("click", () => {
-  form.reset();
-  document.getElementById("kategoriaNowa").style.display = "none";
-  cancelEditBtn.classList.add("hidden");
-  document.getElementById("formSection").style.display = "none";
-  formToggleBtn.textContent = "➕ Dodaj nowe narzędzie";
-});
+// cancelEditBtn.addEventListener("click", () => {
+//   form.reset();
+//   document.getElementById("kategoriaNowa").style.display = "none";
+//   cancelEditBtn.classList.add("hidden");
+//   document.getElementById("formSection").style.display = "none";
+//   formToggleBtn.textContent = "➕ Dodaj nowe narzędzie";
+// });
 
 // ==========================
 // WYSZUKIWANIE (lupka) – wpięte we wspólne filtrowanie
