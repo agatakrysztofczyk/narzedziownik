@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>O aplikacji Narzędziownik</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Favicons / app icons -->
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png">
+  <link rel="manifest" href="manifest.json">
+  <link rel="shortcut icon" href="icons/favicon.ico">
+  <meta name="theme-color" content="#1976d2">
+  <script src="https://cdn.jsdelivr.net/npm/dexie@3.2.3/dist/dexie.min.js"></script>
+</head>
+<body>
+  <header>
+    <h1>Narzędziownik</h1>
+	<div id="themeToggle">
+		<button id="toggleThemeBtn" title="Zmień motyw">🌙 Tryb ciemny</button>
+	</div>
+  </header>
+
+  <main>
+	<h2>O aplikacji</h2>
+	<br>
+	<p>Narzędziownik to prosta aplikacja webowa (PWA), która umożliwia przeglądanie narzędzi(technik) wspierających:
+	<br>- regulację emocji i ciała
+	<br>- osiągnięcie dobrostanu
+	<br>- samorozwój</p>
+	<br>
+	<p><mark>Ważne:</mark> Aplikacja zawiera narzędzia pomocnicze, nie zastępuje psychoterapii.</p>
+	<br>
+	<p>Brak reklam, powiadomień, wyskakujących okienek - to miejsce na ci pomóc się wyciszyć, a nie dokładać kolejnych bodzców.</p>
+	<p>Aplikacja działa offline i może być zainstalowana na telefonie jak zwykła aplikacja mobilna.</p>
+	<br>
+	<h3>Instrukcja jak zainstalować na telefonie:</h3>
+	<br>
+	<p>Android</p>
+	<p>1. Otwórz aplikację w przeglądarce (np. Brave, Chrome) → wpisz adres: https://agatakrysztofczyk.github.io/narzedziownik/</p>
+	<p>2. Wybierz z menu "trzy kropki" opcję Zainstaluj i utwórz skrót → Zainstaluj</p>
+	<br>
+	<p>iOS</p>
+	<p>1. Otwórz aplikację w Safari → wpisz adres: https://agatakrysztofczyk.github.io/narzedziownik/</p>
+	<p>2. Wybierz Udostępnij → Dodaj do ekranu początkowego</p>
+
+  </main>
+
+  <footer>
+    <p>Tryb offline: <span id="offlineStatus">🟢 online</span></p>
+  </footer>
+
+</body>
+</html>
